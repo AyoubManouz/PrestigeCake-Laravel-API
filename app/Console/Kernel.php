@@ -2,8 +2,12 @@
 
 namespace App\Console;
 
+use App\Models\Produit;
+use App\Models\Promotion;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+
+use function Complex\add;
 
 class Kernel extends ConsoleKernel
 {
@@ -24,7 +28,16 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->call(function () {
+            $promotions = Promotion::whereDate('dateFinPromo', '<', today())->get();
+            foreach ($promotions as $promotion) {
+                $produits = Produit::query()->with('promotion')->where('promotion_id', $promotion->id)->get();
+                foreach ($produits as $produit) {
+                    $produit->promotion_id = null;
+                    $produit->save();
+                }
+            }
+        })->daily();
     }
 
     /**
