@@ -18,12 +18,22 @@ class ProductsController extends Controller
      */
     public function index()
     {
+        $promotions = Promotion::whereDate('dateFinPromo', '<', today())->get();
+        foreach ($promotions as $promotion) {
+            $produits = Produit::query()->with('promotion')->where('promotion_id', $promotion->id)->get();
+            foreach ($produits as $produit) {
+                $produit->promotion_id = null;
+                $produit->save();
+            }
+        }
+
         $produits = Produit::query()->with(['promotion', 'categorie'])
             ->with(array('images' => function ($query) {
                 $query->select('produit_id', 'is_principal', 'image_content');
             }))
             ->orderBy('reference')
             ->get();
+
         $reponse = [
             "produits" => $produits
         ];
@@ -43,7 +53,6 @@ class ProductsController extends Controller
     }
 
     public function store(Request $request)
-
     {
         $validated = $request->validate([
             'titre' => 'bail|required|string',
@@ -58,7 +67,6 @@ class ProductsController extends Controller
             'categorie_id' => 'required',
             'image' => 'image|mimes:jpeg,png,jpg,gif,svg',
             'principal_img' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
-
         ]);
 
 
@@ -134,6 +142,14 @@ class ProductsController extends Controller
 
     public function show($id)
     {
+        $promotions = Promotion::whereDate('dateFinPromo', '<', today())->get();
+        foreach ($promotions as $promotion) {
+            $produits = Produit::query()->with('promotion')->where('promotion_id', $promotion->id)->get();
+            foreach ($produits as $produit) {
+                $produit->promotion_id = null;
+                $produit->save();
+            }
+        }
         $produit = Produit::findOrFail($id)
             ->with(['promotion', 'categorie', 'images'])
             ->get();
@@ -255,6 +271,14 @@ class ProductsController extends Controller
 
     public function indesponsable()
     {
+        $promotions = Promotion::whereDate('dateFinPromo', '<', today())->get();
+        foreach ($promotions as $promotion) {
+            $produits = Produit::query()->with('promotion')->where('promotion_id', $promotion->id)->get();
+            foreach ($produits as $produit) {
+                $produit->promotion_id = null;
+                $produit->save();
+            }
+        }
         $produits = Produit::query()->with(['promotion', 'categorie'])
             ->with(array('images' => function ($query) {
                 $query->select('produit_id', 'is_principal', 'image_content');

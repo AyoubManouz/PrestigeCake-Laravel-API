@@ -28,16 +28,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->call(function () {
-            $promotions = Promotion::whereDate('dateFinPromo', '<', today())->get();
-            foreach ($promotions as $promotion) {
-                $produits = Produit::query()->with('promotion')->where('promotion_id', $promotion->id)->get();
-                foreach ($produits as $produit) {
-                    $produit->promotion_id = null;
-                    $produit->save();
-                }
-            }
-        })->daily();
+        $schedule->command('command:deleteEndedPromotions')
+            ->daily();
     }
 
     /**
